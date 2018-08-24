@@ -1,15 +1,15 @@
 class TabCard {
   constructor(element){
     // Use a jQuery selector to assign this.element to the DOM reference
-    this.element = $(element);
+    this.element = element;
   }
   selectCard(){
     // show the card
-    this.element.show('slow');
+    this.element.style.display = "flex";
   }
   deselectCard(){
     // hide the card
-    this.element.hide();
+    this.element.style.display = "none";
   }
 }
 
@@ -18,18 +18,20 @@ class TabLink {
     // Use a jQuery selector to assign this.element to the DOM reference
     this.element = $(this.element);
     // assign this.parent to the parent parameter
-    this.parent = $(this.parent);
+    this.parent = parent;
 
     // Note that we are calling getCards() on Tabs (The parent of TabLink) and passing the data attribute: data-tab, no need to update this line of code.
     this.cards = this.parent.getCards(this.element.data('tab'));
 
     // Using jQuery, map over the array of cards.  In your callback function, create new instances of the TabCard class that contain a card reference. TabCard(card) as an example.
-    this.cards =  tabs.map(function(index, item){
-      new Tabs(item);
-    });;
+    this.cards = this.cards.map(function(index, element) {
+      return new TabCard(this);
+  });
 
     // You will need to create a click handler for the TabLink element that calls selectTab()
-    this.element.click(() => this.selectTab()); 
+    this.element.click( () => {
+      this.selectTab();
+    }); 
   }
 
   selectTab(){
@@ -38,14 +40,18 @@ class TabLink {
     // using a jQuery method, add a class to this.element named "active-tab"
     this.element.addClass("active-tab");
     // iterate over each card using the .each() method in jQuery. call the selectCard() method in your callback function
-    this.cards.each((i, card) => card.selectCard());
+    this.cards.each(function(){
+      this.selectCard()
+    });
   }
 
   deselectTab(){
     // use a jQuery method to remove the class "active-tab" from this.element
-    this.element.remove();
+    this.element.removeClass("active-tab");
     // iterate over each card using the .each() method in jQuery. call the deselectCard() method in your callback function
-    this.cards.each((i, card) => card.deselectCard());
+    this.cards.each(function(){
+      this.deselectCard()
+    });
   }
 }
 
@@ -77,10 +83,10 @@ class Tabs {
   }
 
   getCards(data){
-    if(data = all){
-      return $('.cards-container .card');
+    if(data = 'all'){
+      return $('.card');
     } else {
-      return $(`.cards-container .card[data-tab= "${data}"]`);
+      return $(".card").filter(`[data-tab="${data}"]`)
     }
   
   }
@@ -91,7 +97,6 @@ class Tabs {
 // Otherwise, only cards matching the data attribute should be returned. 
 
 // Using jQuery, select the correct tabs component. Then initialize the Tabs class.
-let tabs = $('.tabs');
+let tabs = document.querySelectorAll(".tabs");
 // tabs = new Tabs(tabs)
-
-
+tabs = Array.from(tabs).map(tab => new Tabs(tab));
